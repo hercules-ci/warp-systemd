@@ -14,8 +14,8 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Network.Wai.Handler.Warp.Systemd
-  build-depends:       base >=4.9 && < 4.10
-                     , network >= 2.6.3.0 && < 2.7
+  build-depends:       base >=4.9 && < 4.13
+                     , network >= 2.6.3.0 && < 3.1
                      , systemd == 1.*
                      , unix
                      , wai == 3.2.*
