@@ -1,7 +1,7 @@
 name:                warp-systemd
 version:             0.1.0.0
 synopsis:            Socket activation and other systemd integration for the Warp web server (WAI)
-homepage:            https://github.com/roberth/warp-socket-activation
+homepage:            https://github.com/hercules-ci/warp-systemd
 license:             BSD3
 license-file:        LICENSE
 author:              Robert Hensing
@@ -9,7 +9,7 @@ maintainer:          hackage@roberthensing.nl
 copyright:           Robert Hensing
 category:            Web
 build-type:          Simple
-extra-source-files:  ChangeLog.md
+extra-source-files:  CHANGELOG.md
 cabal-version:       >=1.10
 
 library
