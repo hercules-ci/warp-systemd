@@ -1,4 +1,4 @@
-# Revision history for warp-socket-activation
+# Revision history for warp-systemd
 
 ## 0.1.0.0  -- YYYY-mm-dd
 
