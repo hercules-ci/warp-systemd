@@ -33,7 +33,7 @@ import           Control.Exception
 import           Control.Monad
 import           Data.Function
 import           Data.Typeable
-import           Network.Socket           (fdSocket, setNonBlockIfNeeded)
+import           Network.Socket           (withFdSocket, setNonBlockIfNeeded)
 import           Network.Wai              as Wai
 import           Network.Wai.Handler.Warp as Warp
 import qualified Network.Wai.Handler.Warp.Internal as WarpInternal
@@ -219,8 +219,9 @@ runSystemdWarp saSettings settings app = do
 
   case maybeSocket of
     Just socket -> do
-      setNonBlockIfNeeded (fdSocket socket)
-      runSettingsSocket settings' socket app
+      withFdSocket socket $ \fd -> do
+        setNonBlockIfNeeded fd
+        runSettingsSocket settings' socket app
     Nothing ->
       runSettings settings' app
 
