@@ -19,6 +19,9 @@ module Network.Wai.Handler.Warp.Systemd
   , heartbeatInterval
   , setHeartbeatInterval
 
+  , heartbeatCheck
+  , setHeartbeatCheck
+
   , onBeginShutdown
   , setOnBeginShutdown
 
@@ -57,6 +60,7 @@ data SystemdSettings =
   , _logWarn :: String -> IO ()
   , _requireSocketActivation :: Bool
   , _heartbeatInterval :: Maybe Int
+  , _heartbeatCheck :: IO ()
   , _dontOverrideInstallShutdownHandler :: Bool
   , _onBeginShutdown :: IO ()
   }
@@ -68,6 +72,7 @@ defaultSystemdSettings = SystemdSettings
   , _logWarn = SIO.hPutStrLn SIO.stderr . ("WARNING: " ++)
   , _requireSocketActivation = False
   , _heartbeatInterval = Nothing
+  , _heartbeatCheck = return ()
   , _dontOverrideInstallShutdownHandler = False
   , _onBeginShutdown = return ()
   }
@@ -97,6 +102,13 @@ requireSocketActivation = lens _requireSocketActivation setRequireSocketActivati
 -- Default: @Nothing@
 heartbeatInterval :: Lens' SystemdSettings (Maybe Int)
 heartbeatInterval = lens _heartbeatInterval setHeartbeatInterval
+
+-- | Run an action before emitting a hearbeat and if it throws an exception, print a warning
+--   and skip systemd notification.
+--
+-- Default: @return ()@
+heartbeatCheck :: Lens' SystemdSettings (IO ())
+heartbeatCheck = lens _heartbeatCheck setHeartbeatCheck
 
 -- | If @True@, do not override 'Warp.Settings'' with
 -- 'setInstallShutdownHandler'. This lets you provide your own
@@ -138,6 +150,10 @@ setRequireSocketActivation x s = s { _requireSocketActivation = x }
 setHeartbeatInterval :: Maybe Int -> SystemdSettings -> SystemdSettings
 setHeartbeatInterval x s = s { _heartbeatInterval = x }
 
+-- | See 'heartbeatCheck'
+setHeartbeatCheck :: IO () -> SystemdSettings -> SystemdSettings
+setHeartbeatCheck action s = s { _heartbeatCheck = action }
+
 -- | See 'dontOverrideInstallShutdownHandler'
 setDontOverrideInstallShutdownHandler :: Bool -> SystemdSettings -> SystemdSettings
 setDontOverrideInstallShutdownHandler x s = s { _dontOverrideInstallShutdownHandler = x }
@@ -164,7 +180,7 @@ runSystemdWarp
 runSystemdWarp saSettings settings app = do
 
   forM_ (_heartbeatInterval saSettings) $ \interval -> do
-    forkIO (heartbeat (_logWarn saSettings) interval)
+    forkIO (heartbeat (_logWarn saSettings) (_heartbeatCheck saSettings) interval)
   
   socketActivationSockets <- Systemd.getActivatedSockets
 
@@ -225,18 +241,25 @@ runSystemdWarp saSettings settings app = do
     Nothing ->
       runSettings settings' app
 
-heartbeat :: (String -> IO ()) -> Int -> IO ()
-heartbeat flogWarn delaySeconds = loop where
+heartbeat :: (String -> IO ()) -> IO () -> Int -> IO ()
+heartbeat flogWarn action delaySeconds = loop where
   loop = do
     let delayMicroSeconds = delaySeconds * 1000 * 1000
-    r <- Systemd.notifyWatchdog
-    case r of
-      Nothing -> do
-        flogWarn "Systemd heartbeat notification does not seem to arrive. Stopping heartbeat notifications."
-        return ()
-      Just _ -> do
+    eitherCheck <- try action
+    case eitherCheck of
+      Left exc -> do
+        flogWarn $ "Systemd hearbeat check failed: " <> displayException (exc :: SomeException)
         threadDelay delayMicroSeconds
         loop
+      Right () -> do
+        r <- Systemd.notifyWatchdog
+        case r of
+          Nothing -> do
+            flogWarn "Systemd heartbeat notification does not seem to arrive. Stopping heartbeat notifications."
+            return ()
+          Just _ -> do
+            threadDelay delayMicroSeconds
+            loop
 
 ---------------- Minimal dependency-free lens ----------------
 
