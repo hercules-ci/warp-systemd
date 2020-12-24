@@ -248,7 +248,7 @@ heartbeat flogWarn action delaySeconds = loop where
     eitherCheck <- try action
     case eitherCheck of
       Left exc -> do
-        flogWarn $ "Systemd hearbeat check failed: " <> displayException (exc :: SomeException)
+        flogWarn $ "Systemd heartbeat check failed: " <> displayException (exc :: SomeException)
         threadDelay delayMicroSeconds
         loop
       Right () -> do
