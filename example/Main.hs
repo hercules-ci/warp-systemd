@@ -3,7 +3,7 @@
 import Data.Function                                 ((&))
 import qualified Network.Wai.Handler.Warp         as Warp
 import qualified Network.Wai.Handler.Warp.Systemd as Systemd
-import Network.Wai
+import Network.Wai                                   ( responseLBS, Application )
 import Network.HTTP.Types.Status                     (status200)
 
 app :: Application
