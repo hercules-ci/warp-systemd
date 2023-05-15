@@ -14,7 +14,7 @@
         inputs.haskell-flake.flakeModule
         inputs.pre-commit-hooks.flakeModule
       ];
-      flake.herculesCI.ciSystems = ["x86_64-linux" "aarch64-darwin"];
+      flake.herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
 
       perSystem = { config, self', pkgs, ... }: {
 
@@ -22,7 +22,7 @@
           # all defaults
         };
 
-        devShells.default = config.devShells.project.overrideAttrs(o: {
+        devShells.default = config.devShells.project.overrideAttrs (o: {
           shellHook = ''
             ${o.shellHook}
             ${config.pre-commit.installationScript}
