@@ -43,7 +43,7 @@ Let's configure your app to run as a socket-activated systemd service. We'll be 
    Description=Warp
    [Service]
    Type=notify
-   WatchdogSec=5
+   WatchdogSec=30
    ExecStart=path-to-my-haskell-binary
    ```
 
