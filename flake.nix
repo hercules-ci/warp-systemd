@@ -18,6 +18,14 @@
 
       perSystem = { config, self', pkgs, ... }: {
 
+        checks.nixos = pkgs.testers.runNixOSTest {
+          imports = [ ./example-nixos/test.nix ];
+          defaults = {
+            imports = [ ./example-nixos/warp-systemd-example.nix ];
+            services.warp-systemd-example.package = config.packages.default;
+          };
+        };
+
         haskellProjects."project" = {
           # all defaults
         };

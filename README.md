@@ -36,6 +36,8 @@ main =
 
 Let's configure your app to run as a socket-activated systemd service. We'll be using the sample app in [example/Main.hs](example/Main.hs).
 
+If these instructions look too manual, we also have an example [NixOS module](example-nixos/warp-systemd-example.nix) and test.
+
 1. Create a new service unit at `/etc/systemd/system/warp.service` that'll run your Haskell binary:
 
    ```systemd
