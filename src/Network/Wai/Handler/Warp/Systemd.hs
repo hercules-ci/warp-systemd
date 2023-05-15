@@ -230,7 +230,8 @@ runSystemdWarp saSettings settings app = do
                                void Systemd.notifyStopping
                                closeListenSocket
                                _onBeginShutdown saSettings
-                         in void $ Signals.installHandler Signals.sigTERM handler Nothing
+                         in forM_ [Signals.sigINT, Signals.sigTERM] $ \signal ->
+                              Signals.installHandler signal handler Nothing
                      )
 
   case maybeSocket of
