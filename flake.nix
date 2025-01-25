@@ -5,6 +5,9 @@
     haskell-flake.url = "github:srid/haskell-flake";
     git-hooks-nix.url = "github:cachix/git-hooks.nix";
     git-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+    hercules-ci-effects.inputs.nixpkgs.follows = "nixpkgs";
+    hercules-ci-effects.inputs.flake-parts.follows = "flake-parts";
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -12,8 +15,9 @@
       imports = [
         inputs.haskell-flake.flakeModule
         inputs.git-hooks-nix.flakeModule
+        inputs.hercules-ci-effects.flakeModule
       ];
-      flake.herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
+      herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
 
       perSystem = { config, self', pkgs, ... }: {
 
