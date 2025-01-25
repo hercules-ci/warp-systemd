@@ -10,7 +10,7 @@
     hercules-ci-effects.inputs.flake-parts.follows = "flake-parts";
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
         inputs.haskell-flake.flakeModule
@@ -22,9 +22,11 @@
 
         checks.nixos = pkgs.testers.runNixOSTest {
           imports = [ ./example-nixos/test.nix ];
-          defaults = {
+          defaults = { pkgs, ... }: {
             imports = [ ./example-nixos/warp-systemd-example.nix ];
-            services.warp-systemd-example.package = config.packages.default;
+            services.warp-systemd-example.package = withSystem pkgs.stdenv.hostPlatform.system ({ config, ... }:
+              config.packages.default
+            );
           };
         };
 
@@ -59,5 +61,5 @@
         };
       };
 
-    };
+    });
 }
