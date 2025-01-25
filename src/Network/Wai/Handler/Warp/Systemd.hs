@@ -259,7 +259,7 @@ heartbeat flogWarn action delaySeconds = loop
 ---------------- Minimal dependency-free lens ----------------
 
 -- | Traverse a single element. The essence of getting and setting.
-type Lens s t a b = forall f. Functor f => (a -> f b) -> s -> f t
+type Lens s t a b = forall f. (Functor f) => (a -> f b) -> s -> f t
 
 -- | Monomorphic 'Lens'
 type Lens' s a = Lens s s a a
