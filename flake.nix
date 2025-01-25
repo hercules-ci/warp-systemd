@@ -17,7 +17,6 @@
         inputs.git-hooks-nix.flakeModule
         inputs.hercules-ci-effects.flakeModule
       ];
-      herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
 
       perSystem = { config, self', pkgs, ... }: {
 
@@ -50,5 +49,15 @@
           ormolu.enable = true;
         };
       };
+
+      herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
+
+      hercules-ci.flake-update = {
+        enable = true;
+        when = {
+          dayOfMonth = [ 3 ];
+        };
+      };
+
     };
 }
