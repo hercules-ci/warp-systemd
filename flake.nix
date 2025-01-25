@@ -3,26 +3,30 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
-    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-    pre-commit-hooks.inputs.nixpkgs.follows = "nixpkgs";
-    pre-commit-hooks.inputs.nixpkgs-stable.follows = "nixpkgs";
+    git-hooks-nix.url = "github:cachix/git-hooks.nix";
+    git-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+    hercules-ci-effects.inputs.nixpkgs.follows = "nixpkgs";
+    hercules-ci-effects.inputs.flake-parts.follows = "flake-parts";
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
         inputs.haskell-flake.flakeModule
-        inputs.pre-commit-hooks.flakeModule
+        inputs.git-hooks-nix.flakeModule
+        inputs.hercules-ci-effects.flakeModule
       ];
-      flake.herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
 
       perSystem = { config, self', pkgs, ... }: {
 
         checks.nixos = pkgs.testers.runNixOSTest {
           imports = [ ./example-nixos/test.nix ];
-          defaults = {
+          defaults = { pkgs, ... }: {
             imports = [ ./example-nixos/warp-systemd-example.nix ];
-            services.warp-systemd-example.package = config.packages.default;
+            services.warp-systemd-example.package = withSystem pkgs.stdenv.hostPlatform.system ({ config, ... }:
+              config.packages.default
+            );
           };
         };
 
@@ -47,5 +51,15 @@
           ormolu.enable = true;
         };
       };
-    };
+
+      herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
+
+      hercules-ci.flake-update = {
+        enable = true;
+        when = {
+          dayOfMonth = [ 3 ];
+        };
+      };
+
+    });
 }
