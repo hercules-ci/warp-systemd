@@ -3,16 +3,15 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
-    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-    pre-commit-hooks.inputs.nixpkgs.follows = "nixpkgs";
-    pre-commit-hooks.inputs.nixpkgs-stable.follows = "nixpkgs";
+    git-hooks-nix.url = "github:cachix/git-hooks.nix";
+    git-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
         inputs.haskell-flake.flakeModule
-        inputs.pre-commit-hooks.flakeModule
+        inputs.git-hooks-nix.flakeModule
       ];
       flake.herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
 
