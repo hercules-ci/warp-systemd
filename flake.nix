@@ -52,8 +52,12 @@
         };
       };
 
-      herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
+      herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" ];
       herculesCI.onPush.default.outputs.devShells.aarch64-darwin = lib.mkForce { };
+      # can trip up a resource limited builder
+      herculesCI.onPush.default.outputs.devShells.aarch64-linux = lib.mkForce { };
+      # builder doesn't virtualize itself; rely on darwin host instead
+      herculesCI.onPush.default.outputs.checks.aarch64-linux.nixos = lib.mkForce { };
 
       hercules-ci.flake-update = {
         enable = true;
