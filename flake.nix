@@ -10,7 +10,7 @@
     hercules-ci-effects.inputs.flake-parts.follows = "flake-parts";
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
+    flake-parts.lib.mkFlake { inherit inputs; } ({ lib, withSystem, ... }: {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
         inputs.haskell-flake.flakeModule
@@ -53,6 +53,7 @@
       };
 
       herculesCI.ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
+      herculesCI.onPush.default.outputs.devShells.aarch64-darwin = lib.mkForce { };
 
       hercules-ci.flake-update = {
         enable = true;
