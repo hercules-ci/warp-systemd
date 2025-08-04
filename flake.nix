@@ -64,6 +64,7 @@
         when = {
           dayOfMonth = [ 3 ];
         };
+        autoMergeMethod = "merge";
       };
 
     });
